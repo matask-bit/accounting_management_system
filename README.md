@@ -1,69 +1,36 @@
-🇱🇹 Freelancer Accounting SaaS (Lithuania)
+Freelancer Accounting SaaS (Lithuania)
 
-A full-stack SaaS MVP designed for Lithuanian freelancers to track income, expenses, and estimate taxes — built with a focus on data integrity, domain modeling, and explainable financial logic.
+A full-stack MVP built to model income, expenses, and tax estimation logic for Lithuanian freelancers.
 
-This project demonstrates:
+The primary focus of this project was data integrity and state-driven financial correctness, not UI polish.
 
-Correct financial domain design
+Purpose
+
+This project explores how financial systems can enforce:
+
+Immutable finalized records
+
+Controlled state transitions
 
 Server-side authoritative calculations
 
-State-driven business rules
+Database-level constraint enforcement
 
-Integrity enforcement at both application and database levels
+The goal was to ensure that financial totals cannot be manipulated through client behavior.
 
-Clean separation between persistence, services, and API layers
+Technology Stack
 
-A thin frontend consuming a correctness-first backend
-
-🚀 Why I Built This
-
-Lithuanian freelancers operating under:
-
-Individuali veikla (Individual Activity)
-
-Verslo liudijimas (Business Certificate)
-
-often lack lightweight tools tailored to local tax structures.
-
-Instead of building a feature-heavy system, I focused on:
-
-Making the numbers trustworthy before making the UI pretty.
-
-This project emphasizes correctness, immutability, and explainability over surface-level CRUD completeness.
-
-🏗 System Architecture
 Backend
 
 FastAPI
 
 PostgreSQL
 
-SQLAlchemy ORM
+SQLAlchemy
 
-UUID primary keys
+Pydantic
 
-JWT authentication
-
-Pydantic v2
-
-No Alembic (schema managed explicitly for MVP phase)
-
-Architectural Decisions
-
-Financial totals are calculated server-side only
-
-Draft invoices are excluded from revenue
-
-Finalized invoices are immutable
-
-Tax logic is centralized in services
-
-Critical constraints enforced in both:
-
-Application layer
-
-Database layer
+JWT Authentication
 
 Frontend
 
@@ -73,244 +40,112 @@ TypeScript
 
 Tailwind CSS
 
-JWT auth stored client-side
+Core Design Principles
+1. Financial State Integrity
 
-Thin UI consuming REST endpoints
+Invoices have two states:
 
-The frontend intentionally avoids:
+draft
 
-Client-side financial calculations
+finalized
 
-Over-optimistic UX assumptions
+Rules enforced:
 
-Hidden logic duplication
+Draft invoices are editable
 
-🧠 Domain Design
+Finalized invoices are immutable
 
-The system models a simplified accounting flow:
+Only finalized invoices affect revenue
 
-User
+Payments can only attach to finalized invoices
 
-Owns all financial records and tax profiles.
+These rules are enforced:
 
-TaxProfile
+In the service layer
 
-Defines the taxation context for a given year.
+With database constraints
 
-Only one active profile per tax year.
+2. Server-Side Financial Calculations
 
-Client
+Revenue is calculated from finalized invoices only
 
-Represents invoice recipients.
+Draft invoices are excluded
 
-Invoice
+Totals are derived during draft stage
 
-Lifecycle:
+Totals are persisted and locked at finalization
 
-draft → finalized
+All aggregation happens in backend services
 
-Rules:
+No financial calculations are performed in the frontend.
 
-Draft invoices are editable.
+3. Constraint Enforcement
 
-Finalized invoices are immutable.
-
-Only finalized invoices affect revenue and tax calculations.
-
-Finalization assigns invoice number and timestamp.
-
-Totals:
-
-Derived from invoice lines while draft.
-
-Persisted and locked upon finalization.
-
-InvoiceLine
+Examples:
 
 Quantity > 0
 
+Expense amount > 0
+
 VAT rate ≥ 0
-
-Belongs to exactly one invoice
-
-Payment
-
-Can only attach to finalized invoices
-
-Amount > 0
-
-Expense
-
-Amount > 0
-
-Used in tax estimation
-
-Simple MVP structure (no receipt management yet)
-
-🧮 Tax Logic (MVP Assumptions)
-
-This project implements tax estimation, not official filing.
-
-Assumptions:
-
-Revenue is based on finalized invoices (accrual-style for MVP)
-
-VAT included in revenue totals
-
-Expenses fully deductible
-
-Standard rounding (2 decimals, half-up)
-
-Estimates only — clearly labeled as such
-
-Endpoints:
-
-GET /tax/summary
-GET /tax/summary/explain
-
-The explain endpoint provides:
-
-Revenue sources
-
-Expense sources
-
-Calculation formulas
-
-Documented assumptions
-
-This was implemented deliberately to make financial logic transparent and auditable.
-
-🔒 Integrity & Safety
-
-Critical invariants enforced:
-
-Draft invoices cannot receive payments
-
-Draft invoices do not affect tax calculations
-
-Finalized invoices cannot be modified
 
 No orphan invoice lines
 
-Monetary values must be positive
+One active tax profile per year
 
-VAT rates cannot be negative
+Critical invariants are validated both:
 
-Database-level constraints back up service logic
+In application logic
 
-Design principle:
+At database level
 
-Financial correctness must not depend solely on UI behavior.
+Tax Estimation (MVP Scope)
 
-📊 Dashboard
+The project includes tax estimation endpoints:
 
-Aggregated via backend:
+/tax/summary
 
-GET /dashboard/summary
+/tax/summary/explain
 
-Returns:
+The explain endpoint provides:
 
-Total income (finalized invoices only)
+Revenue breakdown
 
-Total expenses
+Expense breakdown
 
-Profit
+Applied formulas
 
-Estimated taxes
+Explicit assumptions
 
-All aggregation is server-side.
+This was implemented to make financial logic transparent and auditable.
 
-📁 Project Structure
-Backend
-app/
-  models/
-  schemas/
-  routers/
-  services/
-  core/
-  database.py
-  config.py
-  main.py
+What This Project Demonstrates
 
-Clear separation of concerns:
+State-based business rule enforcement
 
-Persistence (models)
+Backend-first validation strategy
 
-Validation (schemas)
+Data integrity modeling
 
-Business logic (services)
+Immutability patterns
 
-HTTP layer (routers)
+Clear separation between persistence, services, and API
 
-Frontend
-pages/
-components/
-hooks/
-lib/
+REST API design
 
-Thin client consuming backend API.
+Full-stack integration
 
-🛠 Running the Project
-Backend
-uvicorn app.main:app --reload
-Frontend
-npm install
-npm run dev
-🧩 What This Project Demonstrates
+Why This Matters
 
-This repository highlights:
+The project was intentionally built so that:
 
-Domain-driven thinking
+Financial correctness does not depend on frontend behavior.
 
-Financial immutability modeling
-
-State-based business rules
-
-Explicit tax assumptions
-
-Backend-first integrity
-
-Separation between draft and accounting states
-
-Clean REST API design
-
-Full-stack integration (FastAPI + Next.js)
-
-📈 Future Directions
-
-Planned improvements:
-
-Expense categorization logic
-
-Payment reconciliation model
-
-PDF invoice generation
-
-i.SAF export
-
-Multi-currency support
-
-Alembic migrations
-
-Subscription billing
-
-Role-based access control
-
-⚠ Disclaimer
-
-All tax calculations are estimates and for informational purposes only.
-This is not official tax filing software.
-
-👨‍💻 About This Project
-
-Built as a correctness-first MVP to explore:
-
-SaaS architecture
-
-Financial domain modeling
+This reflects real-world constraints where data integrity must be enforced at system level.
 
 Trust-oriented backend design
 
 Full-stack integration
 
 Real-world constraints for regulated domains
+
